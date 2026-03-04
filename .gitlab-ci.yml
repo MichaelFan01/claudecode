@@ -1,0 +1,14 @@
+update-claude-md:
+  stage: review
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - |
+      # 获取 MR 最新评论中的规则更新请求
+      COMMENT=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+        "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes?sort=desc&per_page=1" \
+        | jq -r '.[0].body')
+      if echo "$COMMENT" | grep -qi "@claude.*CLAUDE.md"; then
+        claude -p "根据以下反馈更新 CLAUDE.md：$COMMENT" --allowedTools Edit,Read
+        git add CLAUDE.md && git commit -m "chore: update CLAUDE.md from MR review" && git push
+      fi

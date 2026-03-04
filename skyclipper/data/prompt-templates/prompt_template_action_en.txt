@@ -1,0 +1,109 @@
+# Role  
+You are a media analyst and video action detector.  
+
+# Task  
+I have uploaded a video. Your primary task is to analyze the **ENTIRE VIDEO** from start to finish, segment it into logical clips based on **action changes**, and further subdivide clips based on **shot changes**, while generating a brief description for each clip.
+
+# What is an "Action"?
+An **action** is a distinct, meaningful activity or state performed by the main subject(s) in the video. Actions should be:
+- **Specific**: "Person making coffee" NOT "Person in kitchen"
+- **Activity-focused**: Based on what the subject is DOING, not just where they are
+- **Continuous**: The same action continues until there's a clear change in activity
+
+Examples of action changes:
+- Walking → Running (movement type changes)
+- Standing → Sitting (body position changes)  
+- Talking → Fighting (interaction type changes)
+- Reading book → Closing book and standing up (activity changes)
+
+NOT considered action changes (these are shot changes within the same action):
+- Same action from different camera angles
+- Close-up vs wide shot of the same activity
+- Cut to reaction shot during the same conversation  
+
+# Constraints  
+1. **CRITICAL**: You MUST analyze the COMPLETE video from beginning to end. DO NOT STOP EARLY. If you stop before reaching the end timestamp, the output will be considered incomplete and invalid.
+2. The primary segmentation must be based on **distinct action changes** (e.g., a person transitions from walking to running, from standing to sitting, from talking to fighting, etc.).  
+3. Within the same action, further split clips based on **shot changes** (camera angle change, cut, zoom, pan, etc.). 
+4. **CRITICAL**: Each clip duration should ideally be between **5 and 15 seconds**. If a video segment has no shot boundaries but is longer than 10 seconds, you MUST split it based on action phases, movement changes, or natural pauses to ensure each clip stays within 5-15 seconds.
+5. Clips must be sequential and cover the entire video from start to finish.
+6. The description for each clip (`clip desc`) must be a single, concise sentence summarizing the visual content and camera work in that specific clip.  
+7. Use sequential action IDs starting from 1, incrementing ONLY when there's a significant action change.  
+8. **Action Description Format**: Must follow the pattern "WHO + DO WHAT + (WHERE/WHEN if applicable)". Examples: "Person walking on street", "Two people having conversation in cafe", "Character fighting enemies in corridor". All clips with the same action ID must use the EXACT SAME action description text.  
+9. **IMPORTANT**: Before assigning a new action ID, check if the current action matches any existing action description. If it's the same action, reuse the existing ID and description. Avoid creating different IDs for the same action.
+10. **Character Continuity Rule**: Within the same action, ensure the main character appears in multiple shots to maintain continuity. If the main character (e.g., actor-1) appears in the first shot and another character (actor-2) appears in a subsequent shot, there MUST be a third shot showing the main character (actor-1) again. This ensures character consistency across the action sequence.
+11. Shots lasting 1-3 seconds should be merged into the next clip unless they represent a distinct action change.
+
+You can refer to the subtitle for context. Be careful not to split a single semantic sentence across clips:  
+{}
+
+# Shot Boundary Detection Timestamps (Millisecond Precision)
+The following timestamps represent detected shot boundaries with millisecond precision. **CRITICAL**: You MUST use these timestamps as reference points for accurate segmentation. All <time>HH:MM:SS,mmm-HH:MM:SS,mmm</time> should preferably be derived from these boundary timestamps. **HOWEVER**, if the interval between two consecutive boundary timestamps is too large (exceeding 10 seconds), you MUST predict intermediate timestamps yourself to ensure each clip stays within the 5-15 second range. Your predicted timestamps MUST also be in millisecond precision (HH:MM:SS,mmm format):
+{}  
+
+# Output Format  
+Provide the output as a continuous list of XML-style tags. Adhere strictly to the format below for each clip. Do not add any extra text, explanations, or formatting. **Continue until you have covered the entire video duration.**  
+
+IMPORTANT: Start your response with ```xml and end with ```. Do not include any other text before or after the XML tags.
+
+```xml
+<clip>
+<time>HH:MM:SS,mmm-HH:MM:SS,mmm</time>
+<action>action_id</action>
+<action_desc>Brief action description</action_desc>
+A concise, one-sentence description of this specific clip's content.
+</clip>
+```
+
+# Example  
+```xml
+<clip>
+<time>00:00:00,000-00:00:05,320</time>
+<action>1</action>
+<action_desc>Woman walking on street</action_desc>
+A woman in a red dress walks down a busy city street, captured in a wide establishing shot.
+</clip>
+<clip>
+<time>00:00:05,320-00:00:11,840</time>
+<action>1</action>
+<action_desc>Woman walking on street</action_desc>
+Close-up of the woman's face with focused expression as she continues walking forward.
+</clip>
+<clip>
+<time>00:00:11,840-00:00:18,200</time>
+<action>2</action>
+<action_desc>Two women having conversation on street</action_desc>
+The young woman stops and greets an older woman on the sidewalk, medium two-shot angle.
+</clip>
+<clip>
+<time>00:00:18,200-00:00:25,640</time>
+<action>2</action>
+<action_desc>Two women having conversation on street</action_desc>
+The older woman hands the young woman a white envelope, over-the-shoulder shot from behind the young woman.
+</clip>
+<clip>
+<time>00:00:25,640-00:00:32,100</time>
+<action>3</action>
+<action_desc>Woman entering office building</action_desc>
+The woman approaches and enters the glass doors of a modern office building, exterior establishing shot.
+</clip>
+<clip>
+<time>00:00:32,100-00:00:38,500</time>
+<action>3</action>
+<action_desc>Woman entering office building</action_desc>
+She walks across the marble lobby toward the elevators, interior tracking shot following from behind.
+</clip>
+<clip>
+<time>00:00:38,500-00:00:44,280</time>
+<action>4</action>
+<action_desc>Woman waiting for elevator</action_desc>
+The woman stands in front of the elevator doors, looking at her phone, medium shot.
+</clip>
+<clip>
+<time>00:00:44,280-00:00:50,120</time>
+<action>4</action>
+<action_desc>Woman waiting for elevator</action_desc>
+Close-up of her hands as she puts the envelope into her bag while waiting.
+</clip>
+```
+

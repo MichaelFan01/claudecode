@@ -1,0 +1,25 @@
+[project]
+name = "video-quality-validator"
+version = "0.1.0"
+description = "Video quality validation module for AI/ML training data"
+requires-python = ">=3.10"
+authors = [
+    { name = "SDD Specify Team" }
+]
+dependencies = [
+    "opencv-python>=4.8.0",
+    "click>=8.1.0",
+    "ffmpeg-python>=0.2.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+]
+
+[project.scripts]
+video-quality-validator = "video_quality_validator.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
