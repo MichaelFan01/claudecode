@@ -1,1 +1,0 @@
-"""SkyClipper package."""
